@@ -1,0 +1,34 @@
+#!/bin/bash
+set -e
+
+SCRIPT_PATH="$(readlink -f "$0")"
+DOTFILES_DIR="$(cd "$(dirname "$SCRIPT_PATH")/../../.." && pwd)"
+
+cd "$DOTFILES_DIR"
+
+git fetch origin
+
+LOCAL=$(git rev-parse HEAD)
+REMOTE=$(git rev-parse @{u} 2>/dev/null || echo "")
+BASE=$(git merge-base HEAD @{u} 2>/dev/null || echo "")
+
+if [ -z "$REMOTE" ]; then
+    echo "No upstream branch configured"
+    exit 0
+fi
+
+if [ "$LOCAL" = "$REMOTE" ]; then
+    echo "Already up to date"
+    exit 0
+fi
+
+if [ "$LOCAL" = "$BASE" ]; then
+    git pull --ff-only
+    echo "Updated successfully"
+    "$DOTFILES_DIR/scripts/init_fedora.sh"
+elif [ "$REMOTE" = "$BASE" ]; then
+    echo "Local changes not pushed"
+else
+    echo "Conflict: local and remote have diverged. Manual merge required."
+    exit 1
+fi

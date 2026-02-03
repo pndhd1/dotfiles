@@ -1,0 +1,47 @@
+#!/bin/bash
+set -e
+
+SCRIPT_PATH="$(readlink -f "$0")"
+DOTFILES_DIR="$(cd "$(dirname "$SCRIPT_PATH")/../../.." && pwd)"
+
+cd "$DOTFILES_DIR"
+
+git fetch
+git add -A
+
+changes=$(git diff --cached --name-status)
+
+if [ -z "$changes" ]; then
+    echo "No changes to commit"
+    exit 0
+fi
+
+added=""
+modified=""
+deleted=""
+
+while IFS=$'\t' read -r status file; do
+    case "$status" in
+        A) added="${added:+$added, }$file" ;;
+        M) modified="${modified:+$modified, }$file" ;;
+        D) deleted="${deleted:+$deleted, }$file" ;;
+    esac
+done <<< "$changes"
+
+parts=""
+
+if [ -n "$added" ]; then
+    parts="add: $added"
+fi
+
+if [ -n "$modified" ]; then
+    parts="${parts:+$parts; }update: $modified"
+fi
+
+if [ -n "$deleted" ]; then
+    parts="${parts:+$parts; }remove: $deleted"
+fi
+
+echo "Commit: $parts"
+git commit -m "$parts"
+git push
