@@ -11,7 +11,6 @@ Dotfiles repository for Fedora. Scripts go in `scripts/` directory.
 - Ask user where to place the script:
   - `scripts/` — init/setup scripts (not in PATH)
   - `bin/.local/bin/` — CLI tools (symlinked to ~/.local/bin, in PATH)
-- Place new scripts in `scripts/`
 - Use bash with `set -e`
 - Make executable: `chmod +x scripts/<name>.sh`
 - Scripts may run via symlinks, always resolve real path:
