@@ -15,7 +15,7 @@ for dir in */; do
     fi
 
     echo "Stowing $dir..."
-    stow --adopt "$dir"
+    stow "$dir"
 done
 
 echo "Done"
